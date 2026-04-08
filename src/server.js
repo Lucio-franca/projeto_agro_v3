@@ -9,30 +9,36 @@ app.use(cors()); // Libera a entrada!
 app.use(express.json()); // Ensina o servidor a ler pacotes JSON
 
 
-// ... rota app.get('/startups')
+// ... rota app.get('/listaStartups')
 app.get('/', (req, res) => {
   res.send('AgroTech Connect: O servidor está rodando!');
 });
 
-app.get('/startups', (req, res) => {
+app.get('/listaStartups', (req, res) => {
   res.json(listaStartups); // Usa os dados importados
 });
 
 
-app.post('/startups', (req, res) => {
+app.post('/listaStartups', (req, res) => {
   const novaStartup = req.body;
+
+  // validação do ano
+  if (!novaStartup.ano || novaStartup.ano < 1900 || novaStartup.ano > new Date().getFullYear()) {
+    return res.status(400).json({ erro: "Ano inválido" });
+  }
+
   novaStartup.id = listaStartups.length + 1; // ID automático
   listaStartups.push(novaStartup); // Guarda na lista
   res.status(201).json(novaStartup);
 });
 
 // Rota DELETE: Recebe novos dados
-app.delete('/startups/:id', (req, res) => {
+app.delete('/listaStartups/:id', (req, res) => {
   const idParaDeletar = parseInt(req.params.id);
-  const index = startups.findIndex(s => s.id === idParaDeletar);
+  const index = listaStartups.findIndex(s => s.id === idParaDeletar);
  
   if (index !== -1) {
-    startups.splice(index, 1); // Remove da lista
+    listaStartups.splice(index, 1); // Remove da lista
     res.status(200).json({ mensagem: "Deletado com sucesso" });
   } else {
     res.status(404).json({ erro: "Não encontrada" });
@@ -40,19 +46,20 @@ app.delete('/startups/:id', (req, res) => {
 });
 
 // Rota PUT: Recebe novos dados
-app.put('/startups/:id', (req, res) => {
+app.put('/listaStartups/:id', (req, res) => {
   const idParaEditar = parseInt(req.params.id);
-  const index = startups.findIndex(s => s.id === idParaEditar);
+  const index = listaStartups.findIndex(s => s.id === idParaEditar);
  
   if (index !== -1) {
-    startups[index].nome = req.body.nome;
-    startups[index].especialidade = req.body.especialidade;
-    res.status(200).json(startups[index]);
+    listaStartups[index].nome = req.body.nome;
+    listaStartups[index].especialidade = req.body.especialidade;
+    listaStartups[index].ano = req.body.ano;
+
+    res.status(200).json(listaStartups[index]);
   } else {
     res.status(404).json({ erro: "Não encontrada" });
   }
 });
-
 
 
 // Ligando o servidor
